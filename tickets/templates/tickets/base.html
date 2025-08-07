@@ -28,27 +28,95 @@
                             <a href="{% url 'tickets:dashboard' %}" class="text-sm font-medium hover:text-blue-600">Dashboard</a>
                             <a href="{% url 'tickets:list' %}" class="text-sm font-medium hover:text-blue-600">Tickets</a>
                             <a href="{% url 'tickets:create' %}" class="text-sm font-medium hover:text-blue-600">New Ticket</a>
-                            <a href="{% url 'tickets:reports' %}" class="text-sm font-medium hover:text-blue-600">Reports</a>
+                            <div class="relative group">
+                                <a href="{% url 'tickets:reports_dashboard' %}" class="text-sm font-medium hover:text-blue-600">Reports</a>
+                                <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                    <a href="{% url 'tickets:reports_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Analytics Dashboard</a>
+                                    <a href="{% url 'tickets:reports' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Basic Reports</a>
+                                </div>
+                            </div>
                         </nav>
                         <div class="flex items-center space-x-4">
                             <div class="relative" id="user-menu">
-                                <button class="flex items-center space-x-2 text-sm font-medium hover:text-blue-600" onclick="toggleUserMenu()">
-                                    <span>{{ user.get_full_name|default:user.username }}</span>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button 
+                                    class="flex items-center space-x-2 text-sm font-medium hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1 transition-colors" 
+                                    id="user-menu-button"
+                                    aria-expanded="false" 
+                                    aria-haspopup="true"
+                                >
+                                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                        {{ user.first_name.0|default:user.username.0|upper }}
+                                    </div>
+                                    <span class="hidden md:block">{{ user.get_full_name|default:user.username }}</span>
+                                    <svg class="w-4 h-4 transition-transform duration-200" id="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </button>
-                                <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden" id="user-dropdown">
-                                    <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
-                                    <a href="{% url 'users:edit_my_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
-                                    <a href="{% url 'users:change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Password</a>
-                                    <a href="{% url 'users:activity' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Activity</a>
+                                <div 
+                                    class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out" 
+                                    id="user-dropdown"
+                                    role="menu" 
+                                    aria-orientation="vertical" 
+                                    aria-labelledby="user-menu-button"
+                                >
+                                    <!-- User info header -->
+                                    <div class="px-4 py-3 border-b border-gray-100">
+                                        <p class="text-sm font-medium text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+                                        <p class="text-sm text-gray-500">{{ user.email }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">{{ user.get_role_display }}</p>
+                                    </div>
+                                    
+                                    <!-- Menu items -->
+                                    <div class="py-1">
+                                        <a href="{% url 'users:profile' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" role="menuitem">
+                                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            My Profile
+                                        </a>
+                                        <a href="{% url 'users:edit_my_profile' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" role="menuitem">
+                                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                            Edit Profile
+                                        </a>
+                                        <a href="{% url 'users:change_password' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" role="menuitem">
+                                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                            </svg>
+                                            Change Password
+                                        </a>
+                                        <a href="{% url 'users:activity' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" role="menuitem">
+                                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                            </svg>
+                                            My Activity
+                                        </a>
+                                    </div>
+                                    
                                     {% if user.is_staff %}
-                                        <div class="border-t border-gray-100 my-1"></div>
-                                        <a href="{% url 'users:list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">User Management</a>
+                                    <div class="border-t border-gray-100">
+                                        <div class="py-1">
+                                            <a href="{% url 'users:list' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" role="menuitem">
+                                                <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                                </svg>
+                                                User Management
+                                            </a>
+                                        </div>
+                                    </div>
                                     {% endif %}
-                                    <div class="border-t border-gray-100 my-1"></div>
-                                    <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
+                                    
+                                    <div class="border-t border-gray-100">
+                                        <div class="py-1">
+                                            <a href="{% url 'users:logout' %}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" role="menuitem">
+                                                <svg class="w-4 h-4 mr-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                                </svg>
+                                                Sign out
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -102,17 +170,124 @@
         }
         
         // User menu dropdown functionality
+        let isDropdownOpen = false;
+        
         function toggleUserMenu() {
             const dropdown = document.getElementById('user-dropdown');
-            dropdown.classList.toggle('hidden');
+            const button = document.getElementById('user-menu-button');
+            const arrow = document.getElementById('dropdown-arrow');
+            
+            if (isDropdownOpen) {
+                closeDropdown();
+            } else {
+                openDropdown();
+            }
         }
         
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const userMenu = document.getElementById('user-menu');
+        function openDropdown() {
             const dropdown = document.getElementById('user-dropdown');
-            if (userMenu && dropdown && !userMenu.contains(event.target)) {
-                dropdown.classList.add('hidden');
+            const button = document.getElementById('user-menu-button');
+            const arrow = document.getElementById('dropdown-arrow');
+            
+            dropdown.classList.remove('opacity-0', 'invisible', 'scale-95');
+            dropdown.classList.add('opacity-100', 'visible', 'scale-100');
+            arrow.style.transform = 'rotate(180deg)';
+            button.setAttribute('aria-expanded', 'true');
+            isDropdownOpen = true;
+        }
+        
+        function closeDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            const button = document.getElementById('user-menu-button');
+            const arrow = document.getElementById('dropdown-arrow');
+            
+            dropdown.classList.remove('opacity-100', 'visible', 'scale-100');
+            dropdown.classList.add('opacity-0', 'invisible', 'scale-95');
+            arrow.style.transform = 'rotate(0deg)';
+            button.setAttribute('aria-expanded', 'false');
+            isDropdownOpen = false;
+        }
+        
+        // Initialize dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('user-menu-button');
+            const dropdown = document.getElementById('user-dropdown');
+            
+            if (button && dropdown) {
+                // Toggle dropdown on button click
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleUserMenu();
+                });
+                
+                // Keep dropdown open when hovering over it
+                dropdown.addEventListener('mouseenter', function() {
+                    if (isDropdownOpen) {
+                        clearTimeout(dropdown.closeTimeout);
+                    }
+                });
+                
+                // Close dropdown when mouse leaves (with delay)
+                dropdown.addEventListener('mouseleave', function() {
+                    dropdown.closeTimeout = setTimeout(closeDropdown, 300);
+                });
+                
+                // Keep dropdown open when hovering over button
+                button.addEventListener('mouseenter', function() {
+                    if (isDropdownOpen) {
+                        clearTimeout(dropdown.closeTimeout);
+                    }
+                });
+                
+                // Close dropdown when mouse leaves button (with delay)
+                button.addEventListener('mouseleave', function() {
+                    if (isDropdownOpen) {
+                        dropdown.closeTimeout = setTimeout(closeDropdown, 300);
+                    }
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (isDropdownOpen && !button.contains(event.target) && !dropdown.contains(event.target)) {
+                        closeDropdown();
+                    }
+                });
+                
+                // Close dropdown on escape key
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && isDropdownOpen) {
+                        closeDropdown();
+                        button.focus();
+                    }
+                });
+                
+                // Handle keyboard navigation
+                dropdown.addEventListener('keydown', function(event) {
+                    const menuItems = dropdown.querySelectorAll('a[role="menuitem"]');
+                    const currentIndex = Array.from(menuItems).indexOf(document.activeElement);
+                    
+                    switch (event.key) {
+                        case 'ArrowDown':
+                            event.preventDefault();
+                            const nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+                            menuItems[nextIndex].focus();
+                            break;
+                        case 'ArrowUp':
+                            event.preventDefault();
+                            const prevIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
+                            menuItems[prevIndex].focus();
+                            break;
+                        case 'Home':
+                            event.preventDefault();
+                            menuItems[0].focus();
+                            break;
+                        case 'End':
+                            event.preventDefault();
+                            menuItems[menuItems.length - 1].focus();
+                            break;
+                    }
+                });
             }
         });
     </script>

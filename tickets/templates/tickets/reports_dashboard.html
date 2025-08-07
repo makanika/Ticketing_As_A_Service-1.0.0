@@ -1,0 +1,335 @@
+{% extends 'tickets/base.html' %}
+{% block title %}Reports & Analytics{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-[#3A3A5A] mb-2">Reports & Analytics</h1>
+            <p class="text-gray-600">Comprehensive insights into your ticketing system performance</p>
+        </div>
+        <div class="flex space-x-2">
+            <button onclick="exportData('csv')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export CSV
+            </button>
+            <button onclick="exportData('json')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export JSON
+            </button>
+            <button onclick="exportData('pdf')" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors">
+                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Date Range Filter -->
+<div class="bg-white p-6 rounded-lg shadow-md border border-slate-200 mb-8">
+    <form method="get" class="flex flex-wrap items-end gap-4">
+        <div>
+            <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+            <input type="date" name="start_date" id="start_date" value="{{ start_date|date:'Y-m-d' }}"
+                   class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+            <input type="date" name="end_date" id="end_date" value="{{ end_date|date:'Y-m-d' }}"
+                   class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <button type="submit" class="bg-[#3A3A5A] text-white px-6 py-2 rounded-md hover:bg-[#2c2c46] transition-colors">
+                Apply Filter
+            </button>
+        </div>
+        <div>
+            <a href="{% url 'tickets:reports_dashboard' %}" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Summary Statistics -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Tickets</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_tickets }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Resolved</p>
+                <p class="text-2xl font-bold text-gray-900">{{ resolved_tickets }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Open</p>
+                <p class="text-2xl font-bold text-gray-900">{{ open_tickets }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Avg Resolution Time</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    {% if avg_resolution_time %}
+                        {{ avg_resolution_time.days }}d {% widthratio avg_resolution_time.seconds 3600 1 %}h
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Priority Distribution -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Priority Distribution</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-red-600">P1 - Critical</span>
+                <span class="text-sm font-bold">{{ priority_stats.p1 }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-red-500 h-2 rounded-full" style="width: {% if total_tickets %}{% widthratio priority_stats.p1 total_tickets 100 %}%{% else %}0%{% endif %}"></div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-orange-600">P2 - High</span>
+                <span class="text-sm font-bold">{{ priority_stats.p2 }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-orange-500 h-2 rounded-full" style="width: {% if total_tickets %}{% widthratio priority_stats.p2 total_tickets 100 %}%{% else %}0%{% endif %}"></div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-yellow-600">P3 - Medium</span>
+                <span class="text-sm font-bold">{{ priority_stats.p3 }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-yellow-500 h-2 rounded-full" style="width: {% if total_tickets %}{% widthratio priority_stats.p3 total_tickets 100 %}%{% else %}0%{% endif %}"></div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-blue-600">P4 - Low</span>
+                <span class="text-sm font-bold">{{ priority_stats.p4 }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: {% if total_tickets %}{% widthratio priority_stats.p4 total_tickets 100 %}%{% else %}0%{% endif %}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Distribution -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Status Distribution</h3>
+        <div class="space-y-3">
+            {% for status, count in status_stats.items %}
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700 capitalize">{{ status|title }}</span>
+                <span class="text-sm font-bold">{{ count }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: {% if total_tickets %}{% widthratio count total_tickets 100 %}%{% else %}0%{% endif %}"></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Daily Trends Chart -->
+<div class="bg-white p-6 rounded-lg shadow-md border border-slate-200 mb-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Ticket Creation Trends</h3>
+    <div class="h-64">
+        <canvas id="dailyTrendsChart"></canvas>
+    </div>
+</div>
+
+<!-- Category Analysis -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Categories -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tickets by Category</h3>
+        <div class="space-y-4">
+            {% for category in categories %}
+            {% if category.ticket_count > 0 %}
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-4 h-4 rounded-full" style="background-color: {{ category.color }}"></div>
+                    <span class="text-sm font-medium text-gray-700">{{ category.name }}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-bold text-gray-900">{{ category.ticket_count }}</span>
+                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full" style="background-color: {{ category.color }}; width: {% if total_tickets %}{% widthratio category.ticket_count total_tickets 100 %}%{% else %}0%{% endif %}"></div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No categories found</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Top Assignees -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Assignees</h3>
+        <div class="space-y-4">
+            {% for assignee in top_assignees %}
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span class="text-xs font-medium text-gray-700">{{ assignee.first_name.0|default:assignee.username.0 }}</span>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">{{ assignee.get_full_name }}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-bold text-gray-900">{{ assignee.ticket_count }}</span>
+                    <div class="w-20 bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: {% if total_tickets %}{% widthratio assignee.ticket_count total_tickets 100 %}%{% else %}0%{% endif %}"></div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No assignees found</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- SLA Performance -->
+{% if sla_performance %}
+<div class="bg-white p-6 rounded-lg shadow-md border border-slate-200 mb-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">SLA Performance</h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SLA</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Tickets</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compliant</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compliance Rate</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for item in sla_performance %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.sla.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.total_tickets }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.compliant_tickets }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium text-gray-900 mr-2">{{ item.compliance_rate }}%</span>
+                            <div class="w-16 bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full {% if item.compliance_rate >= 90 %}bg-green-500{% elif item.compliance_rate >= 70 %}bg-yellow-500{% else %}bg-red-500{% endif %}" style="width: {{ item.compliance_rate }}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Daily trends chart
+    const dailyTrendsData = {{ daily_trends|safe }};
+    const ctx = document.getElementById('dailyTrendsChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dailyTrendsData.map(item => item.date),
+            datasets: [{
+                label: 'Tickets Created',
+                data: dailyTrendsData.map(item => item.count),
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Export functions
+    function exportData(format) {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+        let url = `/reports/export/${format}/`;
+        const params = new URLSearchParams();
+        
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+        
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+        
+        window.open(url, '_blank');
+    }
+</script>
+{% endblock %}

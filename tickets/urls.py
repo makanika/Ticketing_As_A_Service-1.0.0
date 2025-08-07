@@ -5,6 +5,10 @@ from .views import (
     TicketCreateView, TicketUpdateView, add_comment, add_attachment,
     bulk_action, ticket_stats_api, reports_view
 )
+from .reports import (
+    reports_dashboard, export_tickets_csv, export_tickets_json,
+    export_tickets_pdf, reports_api
+)
 
 app_name = 'tickets'
 urlpatterns = [
@@ -19,4 +23,11 @@ urlpatterns = [
     path('tickets/bulk-action/', bulk_action, name='bulk_action'),
     path('api/stats/', ticket_stats_api, name='stats_api'),
     path('reports/', reports_view, name='reports'),
+    
+    # Enhanced reporting
+    path('reports/dashboard/', reports_dashboard, name='reports_dashboard'),
+    path('reports/export/csv/', export_tickets_csv, name='export_csv'),
+    path('reports/export/json/', export_tickets_json, name='export_json'),
+    path('reports/export/pdf/', export_tickets_pdf, name='export_pdf'),
+    path('api/reports/', reports_api, name='reports_api'),
 ]
