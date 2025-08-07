@@ -1,0 +1,303 @@
+{% extends 'tickets/base.html' %}
+{% block title %}{{ ticket.ticket_id }} - {{ ticket.title }}{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-3xl font-bold text-[#3A3A5A] mb-2">{{ ticket.ticket_id }}</h1>
+            <h2 class="text-xl text-gray-700 mb-4">{{ ticket.title }}</h2>
+            <div class="flex items-center space-x-4">
+                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full 
+                    {% if ticket.status == 'open' %}bg-green-100 text-green-800
+                    {% elif ticket.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                    {% elif ticket.status == 'pending' %}bg-purple-100 text-purple-800
+                    {% elif ticket.status == 'resolved' %}bg-blue-100 text-blue-800
+                    {% elif ticket.status == 'closed' %}bg-gray-100 text-gray-800
+                    {% else %}bg-red-100 text-red-800{% endif %}">
+                    {{ ticket.get_status_display }}
+                </span>
+                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full 
+                    {% if ticket.priority == 'p1' %}bg-red-100 text-red-800
+                    {% elif ticket.priority == 'p2' %}bg-orange-100 text-orange-800
+                    {% elif ticket.priority == 'p3' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ ticket.get_priority_display }}
+                </span>
+                {% if ticket.is_overdue %}
+                    <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">
+                        Overdue
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{% url 'tickets:edit' ticket.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                Edit Ticket
+            </a>
+            <a href="{% url 'tickets:list' %}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-400 transition-colors">
+                Back to List
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Description -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Description</h3>
+            <div class="prose max-w-none">
+                {{ ticket.description|linebreaks }}
+            </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Comments ({{ comments.count }})</h3>
+            
+            <!-- Add Comment Form -->
+            <form method="post" action="{% url 'tickets:add_comment' ticket.id %}" class="mb-6">
+                {% csrf_token %}
+                <div class="mb-4">
+                    {{ comment_form.content }}
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        {{ comment_form.is_internal }}
+                        <label for="{{ comment_form.is_internal.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                            Internal comment (staff only)
+                        </label>
+                    </div>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                        Add Comment
+                    </button>
+                </div>
+            </form>
+
+            <!-- Comments List -->
+            <div class="space-y-4">
+                {% for comment in comments %}
+                <div class="border-l-4 {% if comment.is_internal %}border-yellow-400 bg-yellow-50{% else %}border-blue-400 bg-blue-50{% endif %} p-4 rounded-r-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-medium text-gray-900">{{ comment.author.get_full_name }}</span>
+                            {% if comment.is_internal %}
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Internal
+                                </span>
+                            {% endif %}
+                        </div>
+                        <span class="text-sm text-gray-500">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                    <div class="text-gray-700">
+                        {{ comment.content|linebreaks }}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No comments yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Attachments -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Attachments ({{ attachments.count }})</h3>
+            
+            <!-- Upload Form -->
+            <form method="post" action="{% url 'tickets:add_attachment' ticket.id %}" enctype="multipart/form-data" class="mb-6">
+                {% csrf_token %}
+                <div class="flex items-end space-x-4">
+                    <div class="flex-1">
+                        {{ attachment_form.file }}
+                    </div>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                        Upload
+                    </button>
+                </div>
+            </form>
+
+            <!-- Attachments List -->
+            <div class="space-y-2">
+                {% for attachment in attachments %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                        </svg>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">{{ attachment.filename }}</div>
+                            <div class="text-xs text-gray-500">{{ attachment.file_size_human }} • {{ attachment.uploaded_at|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                    <a href="{{ attachment.file.url }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        Download
+                    </a>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No attachments.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Activity History</h3>
+            <div class="space-y-3">
+                {% for entry in history %}
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                    <div class="flex-1">
+                        <div class="text-sm text-gray-900">{{ entry.description }}</div>
+                        <div class="text-xs text-gray-500">{{ entry.timestamp|date:"M d, Y H:i" }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No activity history.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Ticket Details -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Ticket Details</h3>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created By</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.created_by.get_full_name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Assigned To</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.assigned_to.get_full_name|default:"Unassigned" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Category</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.category|default:"—" }}</dd>
+                </div>
+                {% if ticket.subcategory %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Subcategory</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.subcategory }}</dd>
+                </div>
+                {% endif %}
+                {% if ticket.asset %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Related Asset</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.asset }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Source</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.get_source_display }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.updated_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% if ticket.resolved_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Resolved</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.resolved_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+                {% if ticket.closed_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Closed</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.closed_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <!-- Contact Information -->
+        {% if ticket.contact_name or ticket.contact_email or ticket.contact_phone %}
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+            <dl class="space-y-3">
+                {% if ticket.contact_name %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Name</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.contact_name }}</dd>
+                </div>
+                {% endif %}
+                {% if ticket.contact_email %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Email</dt>
+                    <dd class="text-sm text-gray-900">
+                        <a href="mailto:{{ ticket.contact_email }}" class="text-blue-600 hover:text-blue-800">
+                            {{ ticket.contact_email }}
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if ticket.contact_phone %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                    <dd class="text-sm text-gray-900">
+                        <a href="tel:{{ ticket.contact_phone }}" class="text-blue-600 hover:text-blue-800">
+                            {{ ticket.contact_phone }}
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+        {% endif %}
+
+        <!-- Time Tracking -->
+        {% if ticket.estimated_hours or ticket.actual_hours %}
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Time Tracking</h3>
+            <dl class="space-y-3">
+                {% if ticket.estimated_hours %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Estimated Hours</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.estimated_hours }}</dd>
+                </div>
+                {% endif %}
+                {% if ticket.actual_hours %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Actual Hours</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.actual_hours }}</dd>
+                </div>
+                {% endif %}
+                {% if ticket.time_to_resolution %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Resolution Time</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.time_to_resolution }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+        {% endif %}
+
+        <!-- SLA Information -->
+        {% if ticket.sla %}
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">SLA Information</h3>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">SLA</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.sla.name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Response Time</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.sla.response_time_hours }} hours</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Resolution Time</dt>
+                    <dd class="text-sm text-gray-900">{{ ticket.sla.resolution_time_hours }} hours</dd>
+                </div>
+            </dl>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

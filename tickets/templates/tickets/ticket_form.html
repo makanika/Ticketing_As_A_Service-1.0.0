@@ -1,0 +1,216 @@
+{% extends 'tickets/base.html' %}
+{% block title %}{% if object %}Edit Ticket{% else %}Create Ticket{% endif %}{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-[#3A3A5A] mb-2">
+        {% if object %}Edit Ticket: {{ object.ticket_id }}{% else %}Create New Ticket{% endif %}
+    </h1>
+    <p class="text-gray-600">
+        {% if object %}Update ticket information and details{% else %}Submit a new support request{% endif %}
+    </p>
+</div>
+
+<div class="max-w-4xl mx-auto">
+    <form method="post" class="bg-white p-8 rounded-lg shadow-md border border-slate-200">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Title -->
+            <div class="md:col-span-2">
+                <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Title *
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="md:col-span-2">
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description *
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                </label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Subcategory -->
+            <div>
+                <label for="{{ form.subcategory.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Subcategory
+                </label>
+                {{ form.subcategory }}
+                {% if form.subcategory.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.subcategory.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Priority -->
+            <div>
+                <label for="{{ form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Priority *
+                </label>
+                {{ form.priority }}
+                {% if form.priority.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.priority.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Asset -->
+            <div>
+                <label for="{{ form.asset.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Related Asset
+                </label>
+                {{ form.asset }}
+                {% if form.asset.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.asset.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            {% if object %}
+            <!-- Status (only for editing) -->
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.status.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Assigned To (only for editing) -->
+            <div>
+                <label for="{{ form.assigned_to.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Assigned To
+                </label>
+                {{ form.assigned_to }}
+                {% if form.assigned_to.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.assigned_to.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Contact Information -->
+            <div class="md:col-span-2">
+                <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                    Contact Information
+                </h3>
+            </div>
+
+            <div>
+                <label for="{{ form.contact_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Name
+                </label>
+                {{ form.contact_name }}
+                {% if form.contact_name.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.contact_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.contact_email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Email
+                </label>
+                {{ form.contact_email }}
+                {% if form.contact_email.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.contact_email.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.contact_phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Phone
+                </label>
+                {{ form.contact_phone }}
+                {% if form.contact_phone.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.contact_phone.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.estimated_hours.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Estimated Hours
+                </label>
+                {{ form.estimated_hours }}
+                {% if form.estimated_hours.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.estimated_hours.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            {% if object %}
+            <!-- Additional fields for editing -->
+            <div>
+                <label for="{{ form.actual_hours.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Actual Hours
+                </label>
+                {{ form.actual_hours }}
+                {% if form.actual_hours.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.actual_hours.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="{{ form.resolution_notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Resolution Notes
+                </label>
+                {{ form.resolution_notes }}
+                {% if form.resolution_notes.errors %}
+                    <div class="mt-1 text-sm text-red-600">{{ form.resolution_notes.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mt-8 flex justify-end space-x-4">
+            <a href="{% if object %}{% url 'tickets:detail' object.pk %}{% else %}{% url 'tickets:list' %}{% endif %}" 
+               class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-400 transition-colors">
+                Cancel
+            </a>
+            <button type="submit" class="bg-[#3A3A5A] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#2c2c46] transition-colors">
+                {% if object %}Update Ticket{% else %}Create Ticket{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Dynamic subcategory filtering based on category selection
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+    const subcategorySelect = document.getElementById('{{ form.subcategory.id_for_label }}');
+    
+    if (categorySelect && subcategorySelect) {
+        categorySelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            
+            // Clear subcategory options
+            subcategorySelect.innerHTML = '<option value="">---------</option>';
+            
+            if (categoryId) {
+                // In a real implementation, you would fetch subcategories via AJAX
+                // For now, we'll just enable the subcategory field
+                subcategorySelect.disabled = false;
+            } else {
+                subcategorySelect.disabled = true;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

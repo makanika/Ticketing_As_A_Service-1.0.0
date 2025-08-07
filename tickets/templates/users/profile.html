@@ -1,0 +1,242 @@
+{% extends 'tickets/base.html' %}
+{% block title %}{{ profile_user.get_full_name }} - Profile{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-3xl font-bold text-[#3A3A5A] mb-2">{{ profile_user.get_full_name }}</h1>
+            <p class="text-gray-600">{{ profile_user.get_role_display }}</p>
+        </div>
+        {% if can_edit %}
+        <div class="flex space-x-2">
+            {% if user == profile_user %}
+                <a href="{% url 'users:edit_my_profile' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    Edit Profile
+                </a>
+            {% else %}
+                <a href="{% url 'users:edit_profile' profile_user.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    Edit Profile
+                </a>
+            {% endif %}
+            {% if user == profile_user %}
+            <a href="{% url 'users:change_password' %}" class="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors">
+                Change Password
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Profile Information -->
+    <div class="lg:col-span-1">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200 mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Profile Information</h3>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Username</dt>
+                    <dd class="text-sm text-gray-900">{{ profile_user.username }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Email</dt>
+                    <dd class="text-sm text-gray-900">{{ profile_user.email }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Role</dt>
+                    <dd class="text-sm text-gray-900">{{ profile_user.get_role_display }}</dd>
+                </div>
+                {% if profile_user.department %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Department</dt>
+                    <dd class="text-sm text-gray-900">{{ profile_user.department }}</dd>
+                </div>
+                {% endif %}
+                {% if profile_user.phone %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                    <dd class="text-sm text-gray-900">{{ profile_user.phone }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Member Since</dt>
+                    <dd class="text-sm text-gray-900">{{ profile_user.date_joined|date:"M d, Y" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Last Login</dt>
+                    <dd class="text-sm text-gray-900">
+                        {% if profile_user.last_login %}
+                            {{ profile_user.last_login|date:"M d, Y H:i" }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Status</dt>
+                    <dd class="text-sm">
+                        {% if profile_user.is_active %}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                        {% else %}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="space-y-2">
+                {% if profile_user.pk == user.pk %}
+                    <a href="{% url 'users:activity' %}" class="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        View Activity History
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:user_activity' profile_user.pk %}" class="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        View Activity History
+                    </a>
+                {% endif %}
+                {% if user.is_staff %}
+                <a href="{% url 'tickets:list' %}?assigned_to={{ profile_user.pk }}" class="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                    View Assigned Tickets
+                </a>
+                <a href="{% url 'tickets:list' %}?created_by={{ profile_user.pk }}" class="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                    View Created Tickets
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics and Activity -->
+    <div class="lg:col-span-2">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200">
+                <div class="flex items-center">
+                    <div class="p-2 rounded-full bg-blue-100 text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-600">Created</p>
+                        <p class="text-xl font-bold text-gray-900">{{ total_created }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200">
+                <div class="flex items-center">
+                    <div class="p-2 rounded-full bg-green-100 text-green-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-600">Assigned</p>
+                        <p class="text-xl font-bold text-gray-900">{{ total_assigned }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200">
+                <div class="flex items-center">
+                    <div class="p-2 rounded-full bg-yellow-100 text-yellow-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-600">In Progress</p>
+                        <p class="text-xl font-bold text-gray-900">{{ in_progress_assigned }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200">
+                <div class="flex items-center">
+                    <div class="p-2 rounded-full bg-purple-100 text-purple-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-600">Resolved</p>
+                        <p class="text-xl font-bold text-gray-900">{{ resolved_assigned }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Recently Created Tickets -->
+            <div class="bg-white rounded-lg shadow-md border border-slate-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Recently Created</h3>
+                </div>
+                <div class="p-6">
+                    {% if recent_created %}
+                        <div class="space-y-3">
+                            {% for ticket in recent_created %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <a href="{% url 'tickets:detail' ticket.pk %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                        {{ ticket.title|truncatechars:30 }}
+                                    </a>
+                                    <p class="text-xs text-gray-500">{{ ticket.ticket_id }} • {{ ticket.created_at|date:"M d" }}</p>
+                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                    {% if ticket.priority == 'p1' %}bg-red-100 text-red-800
+                                    {% elif ticket.priority == 'p2' %}bg-orange-100 text-orange-800
+                                    {% elif ticket.priority == 'p3' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ ticket.get_priority_display }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 text-center py-4">No tickets created yet</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recently Assigned Tickets -->
+            <div class="bg-white rounded-lg shadow-md border border-slate-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Recently Assigned</h3>
+                </div>
+                <div class="p-6">
+                    {% if recent_assigned %}
+                        <div class="space-y-3">
+                            {% for ticket in recent_assigned %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <a href="{% url 'tickets:detail' ticket.pk %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                        {{ ticket.title|truncatechars:30 }}
+                                    </a>
+                                    <p class="text-xs text-gray-500">{{ ticket.ticket_id }} • {{ ticket.updated_at|date:"M d" }}</p>
+                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                    {% if ticket.status == 'open' %}bg-green-100 text-green-800
+                                    {% elif ticket.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                    {% elif ticket.status == 'resolved' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ ticket.get_status_display }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 text-center py-4">No tickets assigned yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

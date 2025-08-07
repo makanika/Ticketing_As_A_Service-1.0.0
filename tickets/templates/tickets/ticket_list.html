@@ -1,0 +1,180 @@
+{% extends 'tickets/base.html' %}
+{% block title %}All Tickets{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-[#3A3A5A] mb-2">All Tickets</h1>
+            <p class="text-gray-600">Manage and track all support tickets</p>
+        </div>
+        <a href="{% url 'tickets:create' %}" class="bg-[#3A3A5A] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#2c2c46] transition-colors">
+            New Ticket
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="bg-white p-6 rounded-lg shadow-md border border-slate-200 mb-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div>
+            {{ search_form.search.label_tag }}
+            {{ search_form.search }}
+        </div>
+        <div>
+            {{ search_form.status.label_tag }}
+            {{ search_form.status }}
+        </div>
+        <div>
+            {{ search_form.priority.label_tag }}
+            {{ search_form.priority }}
+        </div>
+        <div>
+            {{ search_form.category.label_tag }}
+            {{ search_form.category }}
+        </div>
+        <div>
+            {{ search_form.assigned_to.label_tag }}
+            {{ search_form.assigned_to }}
+        </div>
+        <div class="lg:col-span-5 flex space-x-2">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Search
+            </button>
+            <a href="{% url 'tickets:list' %}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+                Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Bulk Actions -->
+<div id="bulk-actions" class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4" style="display: none;">
+    <form method="post" action="{% url 'tickets:bulk_action' %}" class="flex items-center space-x-4">
+        {% csrf_token %}
+        <span class="text-sm font-medium">Bulk Actions:</span>
+        {{ bulk_form.action }}
+        {{ bulk_form.assigned_to }}
+        {{ bulk_form.status }}
+        {{ bulk_form.priority }}
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            Apply
+        </button>
+    </form>
+</div>
+
+<!-- Tickets Table -->
+<div class="bg-white rounded-lg shadow-md border border-slate-200">
+    <div class="overflow-x-auto">
+        <form method="post" action="{% url 'tickets:bulk_action' %}">
+            {% csrf_token %}
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left">
+                            <input type="checkbox" onchange="toggleSelectAll(this)" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for ticket in tickets %}
+                    <tr class="hover:bg-gray-50 {% if ticket.is_overdue %}bg-red-50{% endif %}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <input type="checkbox" name="selected_tickets" value="{{ ticket.id }}" onchange="toggleBulkActions()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">
+                                    <a href="{% url 'tickets:detail' ticket.pk %}" class="hover:text-blue-600">{{ ticket.title }}</a>
+                                    {% if ticket.is_overdue %}
+                                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                            Overdue
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-sm text-gray-500">{{ ticket.ticket_id }}</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ ticket.category|default:"—" }}</div>
+                            {% if ticket.subcategory %}
+                                <div class="text-sm text-gray-500">{{ ticket.subcategory }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                {% if ticket.status == 'open' %}bg-green-100 text-green-800
+                                {% elif ticket.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                {% elif ticket.status == 'pending' %}bg-purple-100 text-purple-800
+                                {% elif ticket.status == 'resolved' %}bg-blue-100 text-blue-800
+                                {% elif ticket.status == 'closed' %}bg-gray-100 text-gray-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ ticket.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                {% if ticket.priority == 'p1' %}bg-red-100 text-red-800
+                                {% elif ticket.priority == 'p2' %}bg-orange-100 text-orange-800
+                                {% elif ticket.priority == 'p3' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ ticket.get_priority_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ ticket.assigned_to|default:"Unassigned" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ ticket.created_at|date:"M d, Y H:i" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{% url 'tickets:detail' ticket.pk %}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                            <a href="{% url 'tickets:edit' ticket.pk %}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No tickets found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="mt-6 flex justify-center">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                First
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Previous
+            </a>
+        {% endif %}
+        
+        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Next
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.assigned_to %}&assigned_to={{ request.GET.assigned_to }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Last
+            </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+{% endblock %}

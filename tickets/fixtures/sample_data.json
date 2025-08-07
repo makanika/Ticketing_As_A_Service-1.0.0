@@ -1,0 +1,52 @@
+[
+  {
+    "model": "tickets.asset",
+    "pk": 1,
+    "fields": {
+      "name": "Generator Set 1",
+      "asset_type": "genset",
+      "location": "Basement Level"
+    }
+  },
+  {
+    "model": "tickets.asset",
+    "pk": 2,
+    "fields": {
+      "name": "AHU-03",
+      "asset_type": "ahu",
+      "location": "Roof Level"
+    }
+  },
+  {
+    "model": "tickets.ticket",
+    "pk": 1,
+    "fields": {
+      "ticket_id": "RX-UG-INC-000001",
+      "title": "Generator failed to start during weekly test",
+      "description": "During the weekly automated test, Generator 1 failed to kick in. Manual start was also unsuccessful. Requires immediate investigation.",
+      "asset": 1,
+      "status": "open",
+      "priority": "p1",
+      "created_by": 1,
+      "assigned_to": null,
+      "created_at": "2025-08-07T08:15:54.982583Z",
+      "updated_at": "2025-08-07T08:15:54.982583Z"
+    }
+  },
+  {
+    "model": "tickets.ticket",
+    "pk": 2,
+    "fields": {
+      "ticket_id": "RX-UG-INC-000002",
+      "title": "AHU-03 making unusual noise",
+      "description": "A high-pitched whining sound is coming from AHU-03. The unit is still operational but the noise is abnormal.",
+      "asset": 2,
+      "status": "open",
+      "priority": "p3",
+      "created_by": 1,
+      "assigned_to": null,
+      "created_at": "2025-08-07T08:15:54.982583Z",
+      "updated_at": "2025-08-07T08:15:54.982583Z"
+    }
+  }
+]

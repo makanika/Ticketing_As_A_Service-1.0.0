@@ -1,0 +1,10 @@
+
+{% extends 'tickets/base.html' %}
+{% block title %}Logged Out{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto text-center">
+    <h1 class="text-2xl font-bold mb-4">Logged Out</h1>
+    <p>You have been successfully logged out.</p>
+    <a href="{% url 'login' %}" class="mt-6 inline-block bg-[#3A3A5A] text-white font-bold py-3 px-8 rounded-lg">Login Again</a>
+</div>
+{% endblock %}

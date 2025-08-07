@@ -1,0 +1,163 @@
+{% extends 'tickets/base.html' %}
+{% block title %}User Management{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-[#3A3A5A] mb-2">User Management</h1>
+            <p class="text-gray-600">Manage system users and their roles</p>
+        </div>
+        <a href="{% url 'users:register' %}" class="bg-[#3A3A5A] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#2c2c46] transition-colors">
+            Add New User
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="bg-white p-6 rounded-lg shadow-md border border-slate-200 mb-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+            <input type="text" name="search" id="search" value="{{ search_query }}"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Search users...">
+        </div>
+        <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+            <select name="role" id="role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All Roles</option>
+                {% for value, label in role_choices %}
+                    <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="is_active" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select name="is_active" id="is_active" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All Users</option>
+                <option value="true" {% if selected_active == 'true' %}selected{% endif %}>Active</option>
+                <option value="false" {% if selected_active == 'false' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        <div class="flex items-end space-x-2">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Search
+            </button>
+            <a href="{% url 'users:list' %}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+                Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Users Table -->
+<div class="bg-white rounded-lg shadow-md border border-slate-200">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for user_item in users %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                <span class="text-sm font-medium text-gray-700">{{ user_item.first_name.0|default:user_item.username.0 }}</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ user_item.get_full_name }}</div>
+                                <div class="text-sm text-gray-500">{{ user_item.username }}</div>
+                                <div class="text-sm text-gray-500">{{ user_item.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                            {% if user_item.role == 'admin' %}bg-purple-100 text-purple-800
+                            {% elif user_item.role == 'manager' %}bg-blue-100 text-blue-800
+                            {% elif user_item.role == 'engineer' %}bg-green-100 text-green-800
+                            {% elif user_item.role == 'bms' %}bg-orange-100 text-orange-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ user_item.get_role_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ user_item.department|default:"—" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if user_item.is_active %}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                        {% else %}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {% if user_item.last_login %}
+                            {{ user_item.last_login|date:"M d, Y" }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <a href="{% url 'users:profile_detail' user_item.pk %}" class="text-blue-600 hover:text-blue-900">View</a>
+                            <a href="{% url 'users:edit_profile' user_item.pk %}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                            {% if user_item != user %}
+                            <form method="post" action="{% url 'users:toggle_status' user_item.pk %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="{% if user_item.is_active %}text-red-600 hover:text-red-900{% else %}text-green-600 hover:text-green-900{% endif %}"
+                                        onclick="return confirm('Are you sure you want to {% if user_item.is_active %}deactivate{% else %}activate{% endif %} this user?')">
+                                    {% if user_item.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No users found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="mt-6 flex justify-center">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}{% if selected_active %}&is_active={{ selected_active }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                First
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}{% if selected_active %}&is_active={{ selected_active }}{% endif %}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Previous
+            </a>
+        {% endif %}
+        
+        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}{% if selected_active %}&is_active={{ selected_active }}{% endif %}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Next
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}{% if selected_active %}&is_active={{ selected_active }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Last
+            </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+{% endblock %}

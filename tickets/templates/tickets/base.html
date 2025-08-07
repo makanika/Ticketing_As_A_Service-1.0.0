@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Data Centre Ticketing{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Lato', sans-serif; background-color: #FDFBF7; color: #3A3A5A; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Lora', serif; }
+    </style>
+</head>
+<body class="antialiased">
+    <header class="bg-[#FDFBF7]/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-[#F5F0E8]">
+        <nav class="container mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-[#3A3A5A] rounded-lg flex items-center justify-center text-white font-bold text-xl font-serif">T</div>
+                    <h1 class="text-xl font-bold text-[#3A3A5A]">DC Ticketing System</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    {% if user.is_authenticated %}
+                        <nav class="flex space-x-4">
+                            <a href="{% url 'tickets:dashboard' %}" class="text-sm font-medium hover:text-blue-600">Dashboard</a>
+                            <a href="{% url 'tickets:list' %}" class="text-sm font-medium hover:text-blue-600">Tickets</a>
+                            <a href="{% url 'tickets:create' %}" class="text-sm font-medium hover:text-blue-600">New Ticket</a>
+                            <a href="{% url 'tickets:reports' %}" class="text-sm font-medium hover:text-blue-600">Reports</a>
+                        </nav>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative" id="user-menu">
+                                <button class="flex items-center space-x-2 text-sm font-medium hover:text-blue-600" onclick="toggleUserMenu()">
+                                    <span>{{ user.get_full_name|default:user.username }}</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden" id="user-dropdown">
+                                    <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
+                                    <a href="{% url 'users:edit_my_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+                                    <a href="{% url 'users:change_password' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change Password</a>
+                                    <a href="{% url 'users:activity' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Activity</a>
+                                    {% if user.is_staff %}
+                                        <div class="border-t border-gray-100 my-1"></div>
+                                        <a href="{% url 'users:list' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">User Management</a>
+                                    {% endif %}
+                                    <div class="border-t border-gray-100 my-1"></div>
+                                    <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-sm font-medium hover:underline">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="container mx-auto px-6 lg:px-8 py-12">
+        {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} px-4 py-3 rounded mb-4 {% if message.tags == 'error' %}bg-red-100 border border-red-400 text-red-700{% elif message.tags == 'warning' %}bg-yellow-100 border border-yellow-400 text-yellow-700{% elif message.tags == 'success' %}bg-green-100 border border-green-400 text-green-700{% else %}bg-blue-100 border border-blue-400 text-blue-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+        
+        // Bulk action functionality
+        function toggleBulkActions() {
+            const checkboxes = document.querySelectorAll('input[name="selected_tickets"]:checked');
+            const bulkForm = document.getElementById('bulk-actions');
+            if (bulkForm) {
+                bulkForm.style.display = checkboxes.length > 0 ? 'block' : 'none';
+            }
+        }
+        
+        // Select all functionality
+        function toggleSelectAll(source) {
+            const checkboxes = document.querySelectorAll('input[name="selected_tickets"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = source.checked;
+            });
+            toggleBulkActions();
+        }
+        
+        // User menu dropdown functionality
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('user-menu');
+            const dropdown = document.getElementById('user-dropdown');
+            if (userMenu && dropdown && !userMenu.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

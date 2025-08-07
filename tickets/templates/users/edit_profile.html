@@ -1,0 +1,105 @@
+{% extends 'tickets/base.html' %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-[#3A3A5A] mb-2">Edit Profile</h1>
+    <p class="text-gray-600">Update your personal information</p>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <form method="post" class="bg-white p-8 rounded-lg shadow-md border border-slate-200">
+        {% csrf_token %}
+        
+        <div class="space-y-6">
+            <!-- Personal Information -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            First Name *
+                        </label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Last Name *
+                        </label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address *
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Work Information -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Work Information</h3>
+                
+                {% if form.role %}
+                <div class="mb-4">
+                    <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Role *
+                    </label>
+                    {{ form.role }}
+                    {% if form.role.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.role.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ form.department.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Department
+                        </label>
+                        {{ form.department }}
+                        {% if form.department.errors %}
+                            <div class="mt-1 text-sm text-red-600">{{ form.department.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Phone Number
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+            {% if object.pk and object.pk != user.pk %}
+                <a href="{% url 'users:profile_detail' object.pk %}" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-400 transition-colors">
+                    Cancel
+                </a>
+            {% else %}
+                <a href="{% url 'users:profile' %}" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-400 transition-colors">
+                    Cancel
+                </a>
+            {% endif %}
+            <button type="submit" class="bg-[#3A3A5A] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#2c2c46] transition-colors">
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
