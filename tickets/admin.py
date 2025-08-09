@@ -1,6 +1,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
 from .models import (
     User, Asset, Ticket, TicketCategory, TicketSubcategory, 
     SLA, TicketComment, TicketAttachment, TicketHistory,
@@ -15,8 +16,23 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = UserAdmin.add_fieldsets + (
         ('Additional Info', {'fields': ('role', 'phone', 'department')}),
     )
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_staff')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_staff', 'is_active')
     list_filter = ('role', 'is_staff', 'is_active')
+
+    actions = ['approve_users', 'deactivate_users']
+
+    def approve_users(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, _(f"{updated} user(s) approved."))
+    approve_users.short_description = _('Approve selected users (activate)')
+
+    def deactivate_users(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, _(f"{updated} user(s) deactivated."))
+    deactivate_users.short_description = _('Deactivate selected users')
+
+# Register the custom User admin
+admin.site.register(User, CustomUserAdmin)
 
 @admin.register(TicketCategory)
 class TicketCategoryAdmin(admin.ModelAdmin):

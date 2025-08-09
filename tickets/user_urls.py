@@ -1,7 +1,8 @@
 from django.urls import path
 from .user_views import (
     UserRegistrationView, UserProfileView, UserUpdateView, UserListView,
-    change_password, user_activity, user_stats_api, toggle_user_status
+    change_password, user_activity, user_stats_api, toggle_user_status,
+    AdminUserCreateView
 )
 from .auth_views import custom_logout
 
@@ -29,6 +30,7 @@ urlpatterns = [
     
     # User management (staff only)
     path('list/', UserListView.as_view(), name='list'),
+    path('create/', AdminUserCreateView.as_view(), name='admin_create'),
     path('<int:pk>/toggle-status/', toggle_user_status, name='toggle_status'),
     
     # API endpoints

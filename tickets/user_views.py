@@ -13,13 +13,13 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import User, Ticket, TicketHistory
-from .forms import CustomUserCreationForm, UserProfileForm, UserUpdateForm
+from .forms import CustomUserCreationForm, UserUpdateForm, AdminUserCreationForm
 
 class UserRegistrationView(CreateView):
     model = User
     form_class = CustomUserCreationForm
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('account_login')
     
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -34,6 +34,27 @@ class UserRegistrationView(CreateView):
         if request.user.is_authenticated:
             return redirect('tickets:dashboard')
         return super().dispatch(request, *args, **kwargs)
+
+class AdminUserCreateView(LoginRequiredMixin, CreateView):
+    model = User
+    form_class = AdminUserCreationForm
+    template_name = 'users/admin_create_user.html'
+    success_url = reverse_lazy('users:list')
+    
+    def dispatch(self, request, *args, **kwargs):
+        # Only staff can create users
+        if not request.user.is_staff:
+            messages.error(request, 'You do not have permission to create users.')
+            return redirect('tickets:dashboard')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request, 
+            f'User {self.object.get_full_name()} created successfully!'
+        )
+        return response
 
 class UserProfileView(LoginRequiredMixin, DetailView):
     model = User

@@ -8,4 +8,4 @@ def custom_logout(request):
     """Custom logout view with proper message"""
     logout(request)
     messages.success(request, 'You have been successfully logged out.')
-    return redirect('login')
+    return redirect('account_login')

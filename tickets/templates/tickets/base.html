@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Data Centre Ticketing{% endblock %}</title>
+    <title>{% block title %}Knowledge Engine{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,8 +19,8 @@
         <nav class="container mx-auto px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 bg-[#3A3A5A] rounded-lg flex items-center justify-center text-white font-bold text-xl font-serif">T</div>
-                    <h1 class="text-xl font-bold text-[#3A3A5A]">DC Ticketing System</h1>
+                    <div class="w-9 h-9 bg-[#3A3A5A] rounded-lg flex items-center justify-center text-white font-bold text-xl font-serif">K</div>
+                    <h1 class="text-xl font-bold text-[#3A3A5A]">Knowledge Engine</h1>
                 </div>
                 <div class="flex items-center space-x-6">
                     {% if user.is_authenticated %}
@@ -121,7 +121,7 @@
                             </div>
                         </div>
                     {% else %}
-                        <a href="{% url 'login' %}" class="text-sm font-medium hover:underline">Login</a>
+                        <a href="{% url 'account_login' %}" class="text-sm font-medium hover:underline">Login</a>
                     {% endif %}
                 </div>
             </div>

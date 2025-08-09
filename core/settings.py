@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-g6c3w@*xsbvd05g9)tao@e8)95=c@k!*w(5#^d4xtnen(umbq1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # For development only
 
 
 # Application definition
@@ -37,7 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    # Local apps
     'tickets',
+    
+    # Third party apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.microsoft',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -55,7 +65,8 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # Add this line to tell Django where your templates folder is
+        'DIRS': [], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -132,4 +143,67 @@ AUTH_USER_MODEL = 'tickets.User'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 LOGIN_URL = '/accounts/login/'
-USER_O365_AUTH_ENABLED = False
+USER_O365_AUTH_ENABLED = True
+
+# Django Allauth Configuration
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Allauth settings
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# Classic allauth setting for authentication via username OR email
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
+ACCOUNT_RATE_LIMITS = {
+    'login_failed': '5/5m',
+}
+ACCOUNT_LOGOUT_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Use custom adapters and forms to require admin approval and collect extra fields
+ACCOUNT_ADAPTER = 'tickets.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'tickets.adapters.CustomSocialAccountAdapter'
+ACCOUNT_FORMS = {
+    'signup': 'tickets.forms.CustomSignupForm',
+}
+# Use http in local dev for generated links (email confirmations/reset)
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
+# Social account providers
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'microsoft': {
+        'tenant': 'common',
+        'SCOPE': [
+            'User.Read',
+        ],
+    }
+}
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development
+DEFAULT_FROM_EMAIL = 'noreply@knowledgeengine.com'
+SERVER_EMAIL = 'admin@knowledgeengine.com'
+
+# For production, use SMTP:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your-email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your-app-password'
